@@ -1,0 +1,45 @@
+name: Rust
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libudev-dev \
+            libasound2-dev \
+            pkg-config
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Prepare artifact
+        run: |
+          BIN_NAME=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].name')
+          VERSION=${GITHUB_REF_NAME}
+          cp target/release/$BIN_NAME $BIN_NAME-$VERSION
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *-v*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

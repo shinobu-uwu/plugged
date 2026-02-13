@@ -1,0 +1,25 @@
+[package]
+name = "plugged"
+version = "0.1.0"
+edition = "2024"
+description = "Daemon to play sounds whenever a USB device is connected or disconnected"
+authors = ["Matheus Filipe dos Santos Reinert <matheus.reinert@protonmail.com>"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/shinobu-uwu/plugged"
+
+[dependencies]
+anyhow = "1.0.101"
+clap = { version = "4.5.58", features = ["derive"] }
+confy = "2.0.0"
+rodio = {version = "0.21.1", features = ["tracing"]}
+serde = { version = "1.0.228", features = ["derive"] }
+tracing = { version = "0.1.44", features = ["log"] }
+tracing-subscriber = { version = "0.3.22", features = ["env-filter", "fmt"] }
+udev = { version = "0.9.3", features = ["mio"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

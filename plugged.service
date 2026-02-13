@@ -1,0 +1,12 @@
+[Unit]
+Description=Plugged Audio Daemon
+After=graphical-session.target sound.target
+Documentation=https://github.com/shinobu-uwu/plugged
+
+[Service]
+ExecStart=plugged
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
