@@ -102,7 +102,7 @@
           cfg = config.services.plugged;
           binary = "${self.packages.${pkgs.system}.default}/bin/plugged";
           tomlFormat = pkgs.formats.toml { };
-          configFile = tomlFormat.generate "plugged-config.toml" {
+          configFile = tomlFormat.generate "config.toml" {
             sounds = {
               connected = toString cfg.settings.sounds.connected;
               disconnected = toString cfg.settings.sounds.disconnected;
