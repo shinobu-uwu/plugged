@@ -25,6 +25,8 @@
             systemd
             alsa-lib
             libopus
+            libnotify
+            glib
           ];
 
           buildDeps = with pkgs; [ pkg-config ];
@@ -108,8 +110,13 @@
           tomlFormat = pkgs.formats.toml { };
           configFile = tomlFormat.generate "config.toml" {
             sounds = {
+              enable = cfg.settings.sounds.enable;
               connected = toString cfg.settings.sounds.connected;
               disconnected = toString cfg.settings.sounds.disconnected;
+            };
+            notifications = {
+              enable = cfg.settings.notifications.enable;
+              format = cfg.settings.notifications.format;
             };
           };
         in
@@ -118,6 +125,11 @@
             enable = lib.mkEnableOption "plugged daemon";
             settings = {
               sounds = {
+                enable = lib.mkOption {
+                  type = lib.types.bool;
+                  default = true;
+                  description = "Enable sound playback on USB events";
+                };
                 connected = lib.mkOption {
                   type = lib.types.path;
                   description = "Path to the connection sound";
@@ -125,6 +137,18 @@
                 disconnected = lib.mkOption {
                   type = lib.types.path;
                   description = "Path to the disconnection sound";
+                };
+              };
+              notifications = {
+                enable = lib.mkOption {
+                  type = lib.types.bool;
+                  default = true;
+                  description = "Enable desktop notifications on USB events";
+                };
+                format = lib.mkOption {
+                  type = lib.types.str;
+                  default = "Device {{device_name}} {{action}}.";
+                  description = "Notification body template";
                 };
               };
             };
