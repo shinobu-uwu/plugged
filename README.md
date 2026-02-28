@@ -6,7 +6,7 @@ configurable sounds when devices are plugged in or out.
 
 ## 🛠️ Installation (Standard Linux)
 
-First of all, you will need `libudev`, and `alsa-lib` installed,
+First of all, you will need `libudev`, `libnotify` and `alsa-lib` installed,
 there is a big chance you already do.
 
 1. You can either build the daemon yourself, with `cargo build --release`,
