@@ -6,7 +6,7 @@ configurable sounds when devices are plugged in or out.
 
 ## 🛠️ Installation (Standard Linux)
 
-First of all, you will need `libudev`, and `alsa-lib` installed,
+First of all, you will need `libudev`, `libnotify` and `alsa-lib` installed,
 there is a big chance you already do.
 
 1. You can either build the daemon yourself, with `cargo build --release`,
@@ -16,8 +16,13 @@ or download it from the latest release
 
 ```toml
 [sounds]
+enable = true
 connected = "<absolute path to your file>"
 disconnected = "<absolute path to your file>"
+
+[notifications]
+enable = true
+format = "Device {{device_name}} {{action}}."
 ```
 
 3. (Optional) Create a systemd unit for your user and enable it:
@@ -53,8 +58,13 @@ Add `plugged` to your flake inputs:
   services.plugged = {
     enable = true;
     settings.sounds = {
+      enable = true;
       connected = ./path/to/plug.ogg;
       disconnected = ./path/to/unplug.ogg;
+    };
+    settings.notifications = {
+      enable = true;
+      format = "Device {{device_name}} {{action}}.";
     };
   };
 }
