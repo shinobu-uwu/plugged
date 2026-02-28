@@ -13,6 +13,7 @@ use udev::{
 };
 
 use std::{
+    collections::HashMap,
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering},
@@ -45,6 +46,7 @@ fn main() -> Result<()> {
     let mut poll = Poll::new()?;
     let mut events = Events::with_capacity(128);
     let mut monitor = MonitorBuilder::new()?.match_subsystem("usb")?.listen()?;
+    let mut name_cache: HashMap<String, String> = HashMap::new();
     let running = Arc::new(AtomicBool::new(true));
     let shutdown_flag = Arc::clone(&running);
 
@@ -75,9 +77,10 @@ fn main() -> Result<()> {
                                 player.play_plugged();
                             }
 
-                            if let Err(err) =
-                                notifier.notify(&device_name(&udev_event), "connected")
-                            {
+                            let key = device_key(&udev_event);
+                            let name = device_name(&udev_event);
+                            name_cache.insert(key, name.clone());
+                            if let Err(err) = notifier.notify(&name, "connected") {
                                 warn!("Failed to send notification: {err}");
                             }
                         }
@@ -87,9 +90,11 @@ fn main() -> Result<()> {
                                 player.play_unplugged();
                             }
 
-                            if let Err(err) =
-                                notifier.notify(&device_name(&udev_event), "disconnected")
-                            {
+                            let key = device_key(&udev_event);
+                            let name = name_cache
+                                .remove(&key)
+                                .unwrap_or_else(|| device_name(&udev_event));
+                            if let Err(err) = notifier.notify(&name, "disconnected") {
                                 warn!("Failed to send notification: {err}");
                             }
                         }
@@ -121,7 +126,15 @@ fn init() -> Result<()> {
 }
 
 fn device_name(event: &udev::Event) -> String {
-    const KEYS: [&str; 3] = ["ID_MODEL_FROM_DATABASE", "ID_MODEL", "DEVNAME"];
+    const KEYS: [&str; 7] = [
+        "ID_MODEL_FROM_DATABASE",
+        "ID_MODEL",
+        "ID_VENDOR_FROM_DATABASE",
+        "ID_VENDOR",
+        "ID_SERIAL",
+        "ID_SERIAL_SHORT",
+        "DEVNAME",
+    ];
 
     for key in KEYS {
         if let Some(value) = event.property_value(key) {
@@ -130,4 +143,8 @@ fn device_name(event: &udev::Event) -> String {
     }
 
     event.sysname().to_string_lossy().into_owned()
+}
+
+fn device_key(event: &udev::Event) -> String {
+    event.devpath().to_string_lossy().into_owned()
 }
