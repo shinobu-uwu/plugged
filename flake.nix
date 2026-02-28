@@ -56,6 +56,10 @@
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [ rust-toolchain ] ++ buildDeps;
             buildInputs = runtimeDeps;
+            env = {
+              RUST_SRC_PATH = "${rust-toolchain}/lib/rustlib/src/rust/library";
+            };
+
           };
         }
       );

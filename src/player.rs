@@ -1,6 +1,7 @@
 use std::{io::Cursor, sync::Arc, thread};
 
 use rodio::OutputStreamBuilder;
+use tracing::error;
 
 #[derive(Debug)]
 pub struct Player {
@@ -26,9 +27,23 @@ impl Player {
 
     fn spawn_playback(&self, data: Arc<[u8]>) {
         thread::spawn(move || {
-            let stream_handle = OutputStreamBuilder::open_default_stream().unwrap();
+            let stream_handle = match OutputStreamBuilder::open_default_stream() {
+                Ok(handle) => handle,
+                Err(err) => {
+                    error!("Failed to open audio output stream: {err}");
+                    return;
+                }
+            };
+
             let input = Cursor::new(data);
-            let sink = rodio::play(stream_handle.mixer(), input).unwrap();
+            let sink = match rodio::play(stream_handle.mixer(), input) {
+                Ok(sink) => sink,
+                Err(err) => {
+                    error!("Failed to start audio playback: {err}");
+                    return;
+                }
+            };
+
             sink.sleep_until_end();
         });
     }
