@@ -1,8 +1,8 @@
 # plugged 🔌🔊
 
-`plugged` is a lightweight hardware event audio daemon written in Rust.
+`plugged` is a lightweight hardware event daemon written in Rust.
 It monitors your system for USB connection events via `udev` and plays
-configurable sounds when devices are plugged in or out.
+configurable sounds and notifications when devices are plugged in or out.
 
 ## 🛠️ Installation (Standard Linux)
 
